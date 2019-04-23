@@ -10,6 +10,8 @@ using com.itextpdf.text.pdf.security;
 using Org.BouncyCastle.X509;
 using System.IO;
 using iTextSharp.text.pdf;
+using iTextSharp.text.html.simpleparser;
+
 
 namespace PDFTools_iTextSharpLib
 {
@@ -484,5 +486,34 @@ namespace PDFTools_iTextSharpLib
             return fileFullPath;
         }
 
+        public string Html2PDF(string html, string PathTarget, string fontPath)
+        {
+            try
+            {
+                if (String.IsNullOrEmpty(fontPath))
+                    fontPath = "c:/windows/fonts/ARIALUNI.TTF";
+
+                FontFactory.Register(fontPath);
+                StyleSheet style = new StyleSheet();
+                style.LoadTagStyle("body", "face", "Arial Unicode MS");
+                style.LoadTagStyle("body", "encoding", BaseFont.IDENTITY_H);
+                Document document = new Document();
+                Stream file = new System.IO.FileStream(PathTarget, System.IO.FileMode.Create);
+                PdfWriter.GetInstance(document, file);
+                document.Open();
+                List<IElement> elements = HTMLWorker.ParseToList(new StringReader(html), style);
+                foreach (IElement el in elements)
+                {
+                    document.Add(el);
+                }
+                document.Close();
+                file.Close();
+                return "";
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+        }
     }
 }
